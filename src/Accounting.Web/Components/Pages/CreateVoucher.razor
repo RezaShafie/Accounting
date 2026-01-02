@@ -17,18 +17,27 @@
 
     private async Task HandleCreate()
     {
-        var request = new CreateVoucherRequest
+        try
         {
-            VoucherNumber = _voucherUiModel.VoucherNumber,
-            Date = _voucherUiModel.Date,
-            Description = _voucherUiModel.Description,
-            Lines = _voucherUiModel.Lines
-        };
+            var request = new CreateVoucherRequest
+            {
+                VoucherNumber = _voucherUiModel.VoucherNumber,
+                Date = _voucherUiModel.Date,
+                Description = _voucherUiModel.Description,
+                Lines = _voucherUiModel.Lines
+            };
 
-        await VoucherService.CreateVoucherAsync(request);
+            await VoucherService.CreateVoucherAsync(request);
 
-        Snackbar.Add("سند با موفقیت ثبت شد", Severity.Success);
-        NavManager.NavigateTo("/");
+
+            Snackbar.Add("سند با موفقیت ثبت شد", Severity.Success);
+
+            NavManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 
     private void GoBack() => NavManager.NavigateTo("/");

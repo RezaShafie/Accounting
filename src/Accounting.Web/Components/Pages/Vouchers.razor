@@ -113,7 +113,6 @@
         }
         catch (Exception ex)
         {
-            // 1. Error Snackbar for loading failures
             Snackbar.Add(ex.Message, Severity.Error);
             return new TableData<VoucherDto>() { TotalItems = 0, Items = new List<VoucherDto>() };
         }

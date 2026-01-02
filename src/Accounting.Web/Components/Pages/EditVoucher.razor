@@ -25,22 +25,42 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _voucherUiModel = await VoucherService.GetVoucherByIdAsync(Id);
+        try
+        {
+            _voucherUiModel = await VoucherService.GetVoucherByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+
+            NavManager.NavigateTo("/");
+        }
     }
 
     private async Task HandleUpdate()
     {
-        var request = new UpdateVoucherRequest
-        {
-            Id = _voucherUiModel.Id,
-            Date = _voucherUiModel.Date,
-            Description = _voucherUiModel.Description,
-            Lines = _voucherUiModel.Lines
-        };
+        if (_voucherUiModel is null) return;
 
-        await VoucherService.UpdateVoucherAsync(request.Id, request);
-        Snackbar.Add("سند ویرایش شد", Severity.Success);
-        NavManager.NavigateTo("/");
+        try
+        {
+            var request = new UpdateVoucherRequest
+            {
+                Id = _voucherUiModel.Id,
+                Date = _voucherUiModel.Date,
+                Description = _voucherUiModel.Description,
+                Lines = _voucherUiModel.Lines
+            };
+
+            await VoucherService.UpdateVoucherAsync(request.Id, request);
+
+            Snackbar.Add("سند با موفقیت ویرایش شد", Severity.Success);
+
+            NavManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 
     private void GoBack() => NavManager.NavigateTo("/");

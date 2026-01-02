@@ -9,13 +9,13 @@
                                  Label="شماره سند"
                                  Variant="Variant.Outlined"
                                  ReadOnly="IsEditMode"
-                                 Min="1"/>
+                                 Min="1" />
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudDatePicker Label="تاریخ سند"
                                @bind-Date="DateProxy"
                                Variant="Variant.Outlined"
-                               Culture="@(new CultureInfo("fa-IR"))"/>
+                               Culture="@(new CultureInfo("fa-IR"))" />
             </MudItem>
             <MudItem xs="12" md="12">
                 <MudTextField @bind-Value="Model.Description"
@@ -28,10 +28,8 @@
                 <MudTable Items="@Model.Lines" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Dense="true">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">آرتیکل‌های سند</MudText>
-                        <MudSpacer />
-                        <MudButton StartIcon="@Icons.Material.Filled.Add"
-                                   Color="Color.Primary"
-                                   OnClick="AddLine">افزودن ردیف</MudButton>
+
+
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh>کد حساب</MudTh>
@@ -58,6 +56,11 @@
                         </MudTd>
                     </RowTemplate>
                     <FooterContent>
+                        <br/>
+                        <MudButton StartIcon="@Icons.Material.Filled.Add"
+                                   Color="Color.Primary"
+                                   OnClick="AddLine"
+                                   Variant="Variant.Outlined">افزودن ردیف</MudButton>
                         <MudTd colspan="2"><strong>جمع کل:</strong></MudTd>
                         <MudTd><strong>@Model.Lines.Sum(x => x.Debit).ToString("N0")</strong></MudTd>
                         <MudTd><strong>@Model.Lines.Sum(x => x.Credit).ToString("N0")</strong></MudTd>
@@ -88,7 +91,6 @@
     private MudForm _form;
     private bool _success;
 
-    // Helper to bridge DateOnly and MudDatePicker (which uses DateTime?)
     private DateTime? DateProxy
     {
         get => Model.Date.ToDateTime(TimeOnly.MinValue);
