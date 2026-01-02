@@ -4,12 +4,17 @@ public class FinalizeVoucherHandler(IAppDbContext context) : IRequestHandler<Fin
 {
     public async Task Handle(FinalizeVoucherCommand request, CancellationToken cancellationToken)
     {
-        var voucher = await context.Vouchers
-            .FindAsync([request.Id], cancellationToken);
+        var voucher = await context.Vouchers.Include(v => v.Lines)
+            .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken);
 
         if (voucher is null)
         {
             throw new NotFoundException($"سند با شناسه {request.Id} یافت نشد.");
+        }
+
+        if (!voucher.IsBalanced())
+        {
+            throw new ArgumentException("سند غیرتراز نمیتواند نهایی شود");
         }
 
         voucher.FinalizeVoucher();

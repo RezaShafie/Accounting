@@ -43,7 +43,7 @@ public class Voucher : AggregateRoot
     public void Update(string description, DateOnly date)
     {
         if (IsFinalized)
-            throw new DomainException("سند تایید شده (Posted) قابل ویرایش نیست.");
+            throw new DomainException("سند تایید شده قابل ویرایش نیست.");
 
         Description = description;
         Date = date;
