@@ -1,0 +1,63 @@
+﻿@page "/vouchers/edit/{id:guid}"
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+@inject IVoucherService VoucherService
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h5" Class="mb-4">ویرایش سند</MudText>
+
+    @if (_voucherUiModel == null)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <VoucherForm Model="_voucherUiModel"
+                     IsEditMode="true"
+                     OnValidSubmit="HandleUpdate"
+                     OnCancel="GoBack" />
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private VoucherDto _voucherUiModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate Fetching Data
+        // _voucherUiModel = await VoucherService.GetByIdAsync(Id);
+
+        // Mock Data for Demo
+        await Task.Delay(500);
+        _voucherUiModel = new VoucherDto
+        {
+            Id = Id,
+            VoucherNumber = 101,
+            Date = DateOnly.FromDateTime(DateTime.Now),
+            Description = "بابت اصلاح حساب",
+            Lines = new List<VoucherLineDto>
+            {
+                new VoucherLineDto("101", "صندوق", 1000, 0),
+                new VoucherLineDto("201", "بانک", 0, 1000)
+            }
+        };
+    }
+
+    private async Task HandleUpdate()
+    {
+        var request = new UpdateVoucherRequest
+        {
+            Id = _voucherUiModel.Id,
+            Date = _voucherUiModel.Date,
+            Description = _voucherUiModel.Description,
+            Lines = _voucherUiModel.Lines
+        };
+
+        await VoucherService.UpdateVoucherAsync(request.Id, request);
+        Snackbar.Add("سند ویرایش شد", Severity.Success);
+        NavManager.NavigateTo("/");
+    }
+
+    private void GoBack() => NavManager.NavigateTo("/");
+}

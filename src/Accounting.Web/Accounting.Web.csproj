@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.15.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Accounting.Application\Accounting.Application.csproj" />
     <ProjectReference Include="..\Accounting.ServiceDefaults\Accounting.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Accounting.Shared\Accounting.Shared.csproj" />
   </ItemGroup>
 
 </Project>

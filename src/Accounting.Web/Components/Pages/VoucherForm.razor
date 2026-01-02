@@ -1,0 +1,116 @@
+﻿@using System.Globalization
+@namespace Accounting.Client.Pages
+
+<MudPaper Class="pa-4">
+    <MudForm @ref="_form" @bind-IsValid="@_success">
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="Model.VoucherNumber"
+                                 Label="شماره سند"
+                                 Variant="Variant.Outlined"
+                                 ReadOnly="IsEditMode"
+                                 Min="1"/>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudDatePicker Label="تاریخ سند"
+                               @bind-Date="DateProxy"
+                               Variant="Variant.Outlined"
+                               Culture="@(new CultureInfo("fa-IR"))"/>
+            </MudItem>
+            <MudItem xs="12" md="12">
+                <MudTextField @bind-Value="Model.Description"
+                              Label="شرح کلی سند"
+                              Variant="Variant.Outlined"
+                              Lines="2" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTable Items="@Model.Lines" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Dense="true">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">آرتیکل‌های سند</MudText>
+                        <MudSpacer />
+                        <MudButton StartIcon="@Icons.Material.Filled.Add"
+                                   Color="Color.Primary"
+                                   OnClick="AddLine">افزودن ردیف</MudButton>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>کد حساب</MudTh>
+                        <MudTh>شرح ردیف</MudTh>
+                        <MudTh>بدهکار</MudTh>
+                        <MudTh>بستانکار</MudTh>
+                        <MudTh>عملیات</MudTh>
+                    </HeaderContent>
+                    <RowTemplate Context="line">
+                        <MudTd DataLabel="کد حساب">
+                            <MudTextField @bind-Value="line.AccountCode" Margin="Margin.Dense" />
+                        </MudTd>
+                        <MudTd DataLabel="شرح ردیف">
+                            <MudTextField @bind-Value="line.Description" Margin="Margin.Dense" />
+                        </MudTd>
+                        <MudTd DataLabel="بدهکار">
+                            <MudNumericField @bind-Value="line.Debit" Margin="Margin.Dense" HideSpinButtons="true" Format="N0" />
+                        </MudTd>
+                        <MudTd DataLabel="بستانکار">
+                            <MudNumericField @bind-Value="line.Credit" Margin="Margin.Dense" HideSpinButtons="true" Format="N0" />
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => RemoveLine(line))" Size="Size.Small" />
+                        </MudTd>
+                    </RowTemplate>
+                    <FooterContent>
+                        <MudTd colspan="2"><strong>جمع کل:</strong></MudTd>
+                        <MudTd><strong>@Model.Lines.Sum(x => x.Debit).ToString("N0")</strong></MudTd>
+                        <MudTd><strong>@Model.Lines.Sum(x => x.Credit).ToString("N0")</strong></MudTd>
+                        <MudTd></MudTd>
+                    </FooterContent>
+                </MudTable>
+            </MudItem>
+
+            <MudItem xs="12" Class="d-flex justify-end gap-2 mt-4">
+                <MudButton Variant="Variant.Text" OnClick="OnCancel">انصراف</MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@(!_success)"
+                           OnClick="Submit">
+                    @(IsEditMode ? "ویرایش سند" : "ثبت سند")
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+</MudPaper>
+
+@code {
+    [Parameter] public VoucherDto Model { get; set; } = new();
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private MudForm _form;
+    private bool _success;
+
+    // Helper to bridge DateOnly and MudDatePicker (which uses DateTime?)
+    private DateTime? DateProxy
+    {
+        get => Model.Date.ToDateTime(TimeOnly.MinValue);
+        set => Model.Date = value.HasValue ? DateOnly.FromDateTime(value.Value) : DateOnly.FromDateTime(DateTime.Now);
+    }
+
+    private void AddLine()
+    {
+        Model.Lines.Add(new VoucherLineDto());
+    }
+
+    private void RemoveLine(VoucherLineDto line)
+    {
+        Model.Lines.Remove(line);
+    }
+
+    private async Task Submit()
+    {
+        await _form.Validate();
+        if (_form.IsValid)
+        {
+            await OnValidSubmit.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,38 @@
+﻿@page "/vouchers/create"
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+@inject IVoucherService VoucherService
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h5" Class="mb-4">سند جدید حسابداری</MudText>
+
+    <VoucherForm Model="_voucherUiModel"
+                 IsEditMode="false"
+                 OnValidSubmit="HandleCreate"
+                 OnCancel="GoBack" />
+</MudContainer>
+
+@code {
+    // We use the DTO as a temporary UI holder
+    private VoucherDto _voucherUiModel = new() { Date = DateOnly.FromDateTime(DateTime.Now) };
+
+    private async Task HandleCreate()
+    {
+        // Mapping UI Model to Create Request
+        var request = new CreateVoucherRequest
+        {
+            VoucherNumber = _voucherUiModel.VoucherNumber,
+            Date = _voucherUiModel.Date,
+            Description = _voucherUiModel.Description,
+            Lines = _voucherUiModel.Lines
+        };
+
+        // Simulate API Call
+        await VoucherService.CreateVoucherAsync(request);
+
+        Snackbar.Add("سند با موفقیت ثبت شد", Severity.Success);
+        NavManager.NavigateTo("/");
+    }
+
+    private void GoBack() => NavManager.NavigateTo("/");
+}
