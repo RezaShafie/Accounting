@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "Accounting.ApiService.Grpc";
+
+package voucher;
+
+import "google/protobuf/timestamp.proto";
+
+/// Voucher service for creating vouchers.
+service VoucherService {
+  rpc CreateVoucher (CreateVoucherRequest) returns (CreateVoucherReply);
+}
+
+/// Request to create a voucher.
+message CreateVoucherRequest {
+  int64 voucher_number = 1;
+  string description = 2;
+
+  // Use a timestamp to carry the voucher date (proto has no DateOnly).
+  google.protobuf.Timestamp voucher_date = 4;
+
+  repeated VoucherLineDto lines = 3;
+}
+
+/// A single voucher line. Monetary values are sent as integer minor-units (cents)
+/// to avoid floating point precision issues.
+message VoucherLineDto {
+  string account_code_raw = 1;
+  string description = 2;
+  int64 debit_cents = 3;
+  int64 credit_cents = 4;
+}
+
+/// Reply containing the created voucher identifier.
+message CreateVoucherReply {
+  string voucher_id = 1;
+}
