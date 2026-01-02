@@ -51,7 +51,7 @@
                 <MudTd DataLabel="شماره">
                     <MudText Typo="Typo.body2" Style="font-weight:bold">@context.VoucherNumber</MudText>
                 </MudTd>
-                <MudTd DataLabel="تاریخ">@context.Date</MudTd>
+                <MudTd DataLabel="تاریخ">@context.Date.ToPersianDateString()</MudTd>
                 <MudTd DataLabel="شرح">
                     <MudText Typo="Typo.body2" Style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         @context.Description
