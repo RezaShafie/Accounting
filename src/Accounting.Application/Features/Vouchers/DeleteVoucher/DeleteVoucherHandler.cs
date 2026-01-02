@@ -14,7 +14,7 @@ public class DeleteVoucherHandler(IAppDbContext context) : IRequestHandler<Delet
 
         if (voucher.IsFinalized)
         {
-            throw new InvalidOperationException("امکان حذف سند تایید شده وجود ندارد.");
+            throw new InvalidOperationException("امکان حذف یا ویرایش سند تایید شده وجود ندارد.");
         }
 
         context.Vouchers.Remove(voucher);
