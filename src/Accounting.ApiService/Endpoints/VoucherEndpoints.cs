@@ -39,7 +39,7 @@ public static class VoucherEndpoints
         [FromBody] CreateVoucherRequest request,
         IMediator mediator)
     {
-        var command = new CreateVoucherCommand(request.VoucherNumber, request.Description, request.Date, request.Lines);
+        var command = new CreateVoucherCommand(request.Description, request.Date, request.Lines);
         var id = await mediator.Send(command);
 
         // Wrap response in Result

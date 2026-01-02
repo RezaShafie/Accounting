@@ -5,4 +5,8 @@ public interface IAppDbContext
     DbSet<Voucher> Vouchers { get; }
     DbSet<VoucherLine> VoucherLines { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+    Task BeginTransactionAsync();
+    Task CommitTransactionAsync();
+    Task RollbackTransactionAsync();
 }

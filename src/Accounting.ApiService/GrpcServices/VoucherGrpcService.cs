@@ -14,7 +14,6 @@ public class VoucherGrpcService(IMediator mediator) : VoucherService.VoucherServ
             : DateOnly.FromDateTime(DateTime.UtcNow);
 
         var command = new CreateVoucherCommand(
-            request.VoucherNumber,
             request.Description,
             voucherDate,
             request.Lines.Select(l => new VoucherLineDto()

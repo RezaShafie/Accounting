@@ -1,7 +1,6 @@
 ﻿using Accounting.Application.Common.Interfaces;
-using Accounting.Infrastructure.Persistence;
 using Accounting.Infrastructure.Persistence.Interceptors;
-using Microsoft.EntityFrameworkCore; // Required for AddDbContext & AddInterceptors
+using Accounting.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(TimeProvider.System);
+        services.AddScoped<IVoucherNumberGenerator, VoucherNumberGenerator>();
         services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddScoped<IAppDbContext>(provider =>

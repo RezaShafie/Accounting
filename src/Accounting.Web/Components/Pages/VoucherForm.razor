@@ -5,13 +5,7 @@
 <MudForm Model="@Model" @ref="_form" Validation="@(ValidateValue)" ValidationDelay="0">
 
     <MudGrid>
-        <MudItem xs="12" sm="4">
-            <MudNumericField @bind-Value="Model.VoucherNumber"
-                             Label="شماره سند"
-                             Variant="Variant.Outlined"
-                             For="@(() => Model.VoucherNumber)" />
-        </MudItem>
-
+        
         <MudItem xs="12" sm="4">
             <MudDatePicker Date="@(Model.Date.ToDateTime(TimeOnly.MinValue))"
                            DateChanged="@(d => Model.Date = DateOnly.FromDateTime(d!.Value))"

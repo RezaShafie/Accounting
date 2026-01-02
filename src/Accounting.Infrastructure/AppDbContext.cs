@@ -13,6 +13,22 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<Voucher> Vouchers { get; set; }
     public DbSet<VoucherLine> VoucherLines { get; set; }
+    public async Task BeginTransactionAsync()
+    {
+        await Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitTransactionAsync()
+    {
+        await Database.CommitTransactionAsync();
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        await Database.RollbackTransactionAsync();
+    }
+
+    public DbSet<VoucherSequence> VoucherSequences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
