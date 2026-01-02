@@ -5,94 +5,122 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudTable T="VoucherDto"
-              ServerData="@ServerReload"
-              Dense="true"
-              Hover="true"
-              Striped="true"
-              @ref="_table"
-              Loading="@_loading"
-              LoadingProgressColor="Color.Info">
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-8">
 
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">اسناد حسابداری</MudText>
-            <MudSpacer />
-            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))"
-                          Placeholder="جستجو..."
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0"
-                          Immediate="true"
-                          DebounceInterval="500"></MudTextField>
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Class="ms-3"
-                       OnClick="@(() => NavManager.NavigateTo("/vouchers/create"))">
-                سند جدید
-            </MudButton>
-        </ToolBarContent>
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4" Style="font-weight: 500;">
+        <b>مدیریت اسناد</b>
+    </MudText>
 
-        <HeaderContent>
-            <MudTh>شماره</MudTh>
-            <MudTh>تاریخ</MudTh>
-            <MudTh>شرح</MudTh>
-            <MudTh>وضعیت</MudTh>
-            <MudTh>عملیات</MudTh>
-        </HeaderContent>
+    <MudPaper Elevation="25" Class="pa-4" Style="border-radius: 12px; background-color: var(--mud-palette-surface);">
+        <MudTable T="VoucherDto"
+                  ServerData="@ServerReload"
+                  Dense="true"
+                  Hover="true"
+                  Striped="true"
+                  Bordered="false"
+                  @ref="_table"
+                  Loading="@_loading"
+                  LoadingProgressColor="Color.Primary"
+                  Elevation="0">
 
-        <RowTemplate>
-            <MudTd DataLabel="شماره">@context.VoucherNumber</MudTd>
-            <MudTd DataLabel="تاریخ">@context.Date</MudTd>
-            <MudTd DataLabel="شرح">@context.Description</MudTd>
-            <MudTd DataLabel="وضعیت">
-                @if (context.IsFinalized)
-                {
-                    <MudChip T="string" Color="Color.Success" Size="Size.Small">قطعی</MudChip>
-                }
-                else
-                {
-                    <MudChip T="string" Color="Color.Warning" Size="Size.Small">پیش‌نویس</MudChip>
-                }
-            </MudTd>
-            <MudTd DataLabel="عملیات">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                               Size="Size.Small"
-                               Color="Color.Info"
-                               OnClick="@(() => NavManager.NavigateTo($"/vouchers/edit/{context.Id}"))" />
+            <ToolBarContent>
+                <div class="d-flex align-center flex-grow-1 gap-4">
+                    <MudIcon Icon="@Icons.Material.TwoTone.ReceiptLong" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h6">لیست اسناد حسابداری</MudText>
 
-                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                               Size="Size.Small"
-                               Color="Color.Error"
-                               OnClick="@(() => DeleteVoucher(context.Id, (int)context.VoucherNumber))" />
+                    <MudSpacer />
 
-                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
-                               Size="Size.Small"
-                               Color="Color.Success"
-                               OnClick="@(() => FinalizeVoucher(context.Id))" />
-            </MudTd>
-        </RowTemplate>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => NavManager.NavigateTo("/vouchers/create"))">
+                        سند جدید
+                    </MudButton>
+                </div>
+            </ToolBarContent>
 
-        <NoRecordsContent>
-            <MudText>هیچ سندی یافت نشد.</MudText>
-        </NoRecordsContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortLabel="VoucherNumber" T="VoucherDto">شماره</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortLabel="Date" T="VoucherDto">تاریخ</MudTableSortLabel></MudTh>
+                <MudTh>شرح</MudTh>
+                <MudTh>وضعیت</MudTh>
+                <MudTh Style="text-align:center">عملیات</MudTh>
+            </HeaderContent>
 
-        <LoadingContent>
-            <MudText>در حال بارگذاری اطلاعات...</MudText>
-        </LoadingContent>
+            <RowTemplate>
+                <MudTd DataLabel="شماره">
+                    <MudText Typo="Typo.body2" Style="font-weight:bold">@context.VoucherNumber</MudText>
+                </MudTd>
+                <MudTd DataLabel="تاریخ">@context.Date</MudTd>
+                <MudTd DataLabel="شرح">
+                    <MudText Typo="Typo.body2" Style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        @context.Description
+                    </MudText>
+                </MudTd>
+                <MudTd DataLabel="وضعیت">
+                    @if (context.IsFinalized)
+                    {
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Size="Size.Small" Icon="@Icons.Material.Filled.Lock">قطعی</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Small" Icon="@Icons.Material.Filled.EditNote">پیش‌نویس</MudChip>
+                    }
+                </MudTd>
+                <MudTd DataLabel="عملیات" Style="text-align:center">
 
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"
-                           InfoFormat="{first_item}-{last_item} از {all_items}" />
-        </PagerContent>
-    </MudTable>
+                    <MudTooltip Text="ویرایش" Arrow="true" Placement="Placement.Top">
+                        <MudIconButton Icon="@Icons.Material.TwoTone.Edit"
+                                       Size="Size.Small"
+                                       Color="Color.Info"
+                                       Disabled="@context.IsFinalized"
+                                       OnClick="@(() => NavManager.NavigateTo($"/vouchers/edit/{context.Id}"))" />
+                    </MudTooltip>
+
+                    <MudTooltip Text="حذف" Arrow="true" Placement="Placement.Top">
+                        <MudIconButton Icon="@Icons.Material.TwoTone.Delete"
+                                       Size="Size.Small"
+                                       Color="Color.Error"
+                                       Disabled="@context.IsFinalized"
+                                       OnClick="@(() => DeleteVoucher(context.Id, (int)context.VoucherNumber))" />
+                    </MudTooltip>
+
+                    <MudTooltip Text="نهایی سازی" Arrow="true" Placement="Placement.Top">
+                        <MudIconButton Icon="@Icons.Material.TwoTone.CheckCircle"
+                                       Size="Size.Small"
+                                       Color="Color.Success"
+                                       Disabled="@context.IsFinalized"
+                                       OnClick="@(() => FinalizeVoucher(context.Id))" />
+                    </MudTooltip>
+
+                </MudTd>
+            </RowTemplate>
+
+            <NoRecordsContent>
+                <MudStack AlignItems="AlignItems.Center" Class="py-8">
+                    <MudIcon Icon="@Icons.Material.TwoTone.Note" Size="Size.Large" Color="Color.Default" />
+                    <MudText Color="Color.Secondary">هیچ سندی یافت نشد.</MudText>
+                </MudStack>
+            </NoRecordsContent>
+
+            <LoadingContent>
+                <MudStack AlignItems="AlignItems.Center" Class="py-8">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    <MudText Class="mt-2">در حال بارگذاری اطلاعات...</MudText>
+                </MudStack>
+            </LoadingContent>
+
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"
+                               InfoFormat="{first_item}-{last_item} از {all_items}"
+                               RowsPerPageString="تعداد در صفحه:" />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
 </MudContainer>
 
 @code {
     private MudTable<VoucherDto> _table;
-    private string _searchString = "";
     private bool _loading = true;
 
     private async Task<TableData<VoucherDto>> ServerReload(TableState state, CancellationToken token)
@@ -103,6 +131,7 @@
             var pageNumber = state.Page + 1;
             var pageSize = state.PageSize;
 
+            // Uses existing simple get method (no search string)
             var result = await VoucherService.GetVouchersAsync(pageNumber, pageSize);
 
             return new TableData<VoucherDto>()
@@ -134,9 +163,7 @@
             try
             {
                 await VoucherService.DeleteVoucherAsync(id);
-
                 Snackbar.Add("سند با موفقیت حذف شد.", Severity.Success);
-
                 await _table.ReloadServerData();
             }
             catch (Exception ex)
@@ -145,11 +172,12 @@
             }
         }
     }
+
     private async Task FinalizeVoucher(Guid id)
     {
         var confirm = await DialogService.ShowMessageBox(
             "نهایی سازی",
-            $"آیا از نهایی سازی سند اطمینان دارید",
+            $"آیا از نهایی سازی سند اطمینان دارید؟ (این عملیات غیرقابل بازگشت است)",
             yesText: "بله", cancelText: "خیر");
 
         if (confirm == true)
@@ -157,9 +185,7 @@
             try
             {
                 await VoucherService.FinalizeVoucherAsync(id);
-
                 Snackbar.Add("سند نهایی شد.", Severity.Success);
-
                 await _table.ReloadServerData();
             }
             catch (Exception ex)
@@ -167,11 +193,5 @@
                 Snackbar.Add(ex.Message, Severity.Error);
             }
         }
-    }
-
-    private void OnSearch(string text)
-    {
-        _searchString = text;
-        _table.ReloadServerData();
     }
 }

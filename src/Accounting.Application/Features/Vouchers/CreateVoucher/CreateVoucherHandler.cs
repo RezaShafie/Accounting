@@ -4,32 +4,53 @@ public class CreateVoucherHandler(IAppDbContext context, IVoucherNumberGenerator
 {
     public async Task<Guid> Handle(CreateVoucherCommand request, CancellationToken cancellationToken)
     {
-        using var transaction = context.BeginTransactionAsync();
-
-        try
+        return await context.ExecuteStrategyAsync(async () =>
         {
-            var fiscalYear = request.Date.Year;
-            var voucherNumber = await numberGenerator.GetNextVoucherNumberAsync(fiscalYear, cancellationToken);
+            await context.BeginTransactionAsync();
 
-            var voucher = Voucher.Create(voucherNumber, request.Description, request.Date);
-
-            foreach (var line in request.Lines)
+            try
             {
-                voucher.AddLine(line.AccountCode, line.Description, line.Debit, line.Credit);
+                var fiscalYear = request.Date.Year;
+
+                var voucherNumber = await numberGenerator.GetNextVoucherNumberAsync(fiscalYear, cancellationToken);
+
+                
+                var voucher = Voucher.Create(
+                    voucherNumber,
+                    request.Description,
+                    request.Date
+                );
+
+                
+                foreach (var line in request.Lines)
+                {
+                    voucher.AddLine(line.AccountCode, line.Description, line.Debit, line.Credit);
+                }
+
+               
+                if (!voucher.IsBalanced())
+                {
+                    throw new DomainException("سند تراز نیست.");
+                }
+
+                
+                context.Vouchers.Add(voucher);
+
+           
+                await context.SaveChangesAsync(cancellationToken);
+
+               
+                await context.CommitTransactionAsync();
+
+                return voucher.Id;
+            }
+            catch
+            {
+                await context.RollbackTransactionAsync();
+                throw;
             }
 
-            context.Vouchers.Add(voucher);
-            await context.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
 
-            await context.CommitTransactionAsync();
-
-            return voucher.Id;
-        }
-        catch (Exception e)
-        {
-            await context.RollbackTransactionAsync();
-            throw;
-        }
-        
     }
 }

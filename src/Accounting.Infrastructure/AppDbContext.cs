@@ -28,6 +28,12 @@ public class AppDbContext : DbContext, IAppDbContext
         await Database.RollbackTransactionAsync();
     }
 
+    public async Task<TResult> ExecuteStrategyAsync<TResult>(Func<Task<TResult>> operation, CancellationToken ct)
+    {
+        var strategy = Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () => await operation());
+    }
+
     public DbSet<VoucherSequence> VoucherSequences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

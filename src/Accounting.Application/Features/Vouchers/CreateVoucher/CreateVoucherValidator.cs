@@ -4,7 +4,6 @@ public class CreateVoucherCommandValidator : AbstractValidator<CreateVoucherComm
 {
     public CreateVoucherCommandValidator()
     {
-        RuleFor(v => v.VoucherNumber).GreaterThan(0).WithMessage("شماره سند نامعتبر است.");
         RuleFor(v => v.Description).NotEmpty().WithMessage("شرح سند الزامی است.");
         RuleFor(v => v.Lines).NotEmpty().WithMessage("سند باید حداقل یک ردیف داشته باشد.");
 
