@@ -90,7 +90,7 @@ public class VoucherService(HttpClient httpClient, ILogger<VoucherService> logge
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync($"api/vouchers/finalize",id);
+            var response = await httpClient.PostAsync($"api/vouchers/finalize/{id}", null);
             await HandleResponseAsync(response);
         }
         catch (Exception ex)
@@ -101,9 +101,7 @@ public class VoucherService(HttpClient httpClient, ILogger<VoucherService> logge
     }
 
 
-    /// <summary>
-    /// Handles response for endpoints returning data (Result<T>).
-    /// </summary>
+   
     private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
     {
         var result = await response.Content.ReadFromJsonAsync<Result<T>>(_options);
