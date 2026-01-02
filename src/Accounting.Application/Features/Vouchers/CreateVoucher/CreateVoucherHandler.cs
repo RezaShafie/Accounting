@@ -4,7 +4,7 @@ public class CreateVoucherHandler(IAppDbContext context) : IRequestHandler<Creat
 {
     public async Task<Guid> Handle(CreateVoucherCommand request, CancellationToken cancellationToken)
     {
-        var voucher = Voucher.Create(request.VoucherNumber, request.Description);
+        var voucher = Voucher.Create(request.VoucherNumber, request.Description, request.Date);
 
         foreach (var line in request.Lines)
         {
