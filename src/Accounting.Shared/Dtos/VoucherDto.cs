@@ -41,11 +41,13 @@ public class VoucherDto
 
 public class VoucherLineDto
 {
-    public VoucherLineDto(string accountCode,
+    public VoucherLineDto(
+        Guid id, string accountCode,
         string description,
         decimal debit,
         decimal credit)
     {
+        Id = id;
         AccountCode = accountCode;
         Description = description;
         Debit = debit;
@@ -54,6 +56,8 @@ public class VoucherLineDto
     public VoucherLineDto()
     {
     }
+
+    public Guid Id { get; set; }
     public string AccountCode { get; set; }
     public string Description { get; set; } 
     public decimal Debit { get; set; } 

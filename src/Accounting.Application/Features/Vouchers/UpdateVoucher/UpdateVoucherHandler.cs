@@ -16,17 +16,45 @@ public class UpdateVoucherHandler(IAppDbContext context) : IRequestHandler<Updat
 
         voucher.Update(request.Description, request.Date);
 
+        var requestLineIds = request.Lines
+            .Select(l => l.Id)
+            .Where(id => id != Guid.Empty)
+            .ToHashSet();
 
-        voucher.ClearLines();
+    
+        var linesToDelete = voucher.Lines
+            .Where(l => !requestLineIds.Contains(l.Id))
+            .ToList();
+
+        foreach (var line in linesToDelete)
+        {
+            voucher.RemoveLine(line.Id);
+        }
 
         foreach (var lineDto in request.Lines)
         {
-            voucher.AddLine(
-                lineDto.AccountCode,
-                lineDto.Description,
-                lineDto.Debit,
-                lineDto.Credit
-            );
+            var existsInDb = lineDto.Id != Guid.Empty &&
+                             voucher.Lines.Any(l => l.Id == lineDto.Id);
+
+            if (existsInDb)
+            {
+                voucher.UpdateLine(
+                    lineDto.Id,
+                    lineDto.AccountCode,
+                    lineDto.Description,
+                    lineDto.Debit,
+                    lineDto.Credit
+                );
+            }
+            else
+            {
+                voucher.AddLine(
+                    lineDto.AccountCode,
+                    lineDto.Description,
+                    lineDto.Debit,
+                    lineDto.Credit
+                );
+            }
         }
 
         if (!voucher.IsBalanced())

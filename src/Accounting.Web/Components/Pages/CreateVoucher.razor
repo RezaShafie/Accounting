@@ -13,12 +13,10 @@
 </MudContainer>
 
 @code {
-    // We use the DTO as a temporary UI holder
     private VoucherDto _voucherUiModel = new() { Date = DateOnly.FromDateTime(DateTime.Now) };
 
     private async Task HandleCreate()
     {
-        // Mapping UI Model to Create Request
         var request = new CreateVoucherRequest
         {
             VoucherNumber = _voucherUiModel.VoucherNumber,
@@ -27,7 +25,6 @@
             Lines = _voucherUiModel.Lines
         };
 
-        // Simulate API Call
         await VoucherService.CreateVoucherAsync(request);
 
         Snackbar.Add("سند با موفقیت ثبت شد", Severity.Success);

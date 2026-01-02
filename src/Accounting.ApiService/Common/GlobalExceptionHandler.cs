@@ -7,41 +7,48 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var problemDetails = new ProblemDetails
-        {
-            Instance = httpContext.Request.Path
-        };
+        Result errorResponse;
+        int statusCode;
 
         switch (exception)
         {
+            // 1. Validation Errors (FluentValidation)
             case ValidationException validationEx:
-                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                problemDetails.Title = "خطای اعتبارسنجی";
-                problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1";
-                problemDetails.Detail = "خطای اعتبارسنجی رخ داد.";
+                statusCode = StatusCodes.Status400BadRequest;
 
-                problemDetails.Extensions["errors"] = validationEx.Errors
-                    .GroupBy(e => e.PropertyName)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(e => e.ErrorMessage).ToArray()
-                    );
+                // Flatten validation errors into a List<string> for the Result object
+                var validationErrors = validationEx.Errors
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                errorResponse = Result.Failure("خطای اعتبارسنجی رخ داد.", validationErrors);
                 break;
-            case ArgumentException or DomainException or NotFoundException:
-                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                problemDetails.Title = "خطای بیزنسی رخ داد";
-                problemDetails.Detail = exception.Message;
+
+            // 2. Not Found Errors (Return 404)
+            case NotFoundException or KeyNotFoundException:
+                statusCode = StatusCodes.Status404NotFound;
+                errorResponse = Result.Failure(exception.Message);
                 break;
+
+            // 3. Domain / Business Logic Errors (Return 400)
+            case ArgumentException or DomainException:
+                statusCode = StatusCodes.Status400BadRequest;
+                errorResponse = Result.Failure(exception.Message);
+                break;
+
+            // 4. Unhandled Internal Server Errors (Return 500)
             default:
                 logger.LogError(exception, "خطای پیش بینی نشده رخ داد.");
 
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                problemDetails.Title = "خطای سرور";
-                problemDetails.Detail = "خطای داخلی رخ داد، لطفا با راهبر سایت تماس بگیرید";
+                statusCode = StatusCodes.Status500InternalServerError;
+                errorResponse = Result.Failure("خطای داخلی رخ داد، لطفا با راهبر سایت تماس بگیرید");
                 break;
         }
 
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        httpContext.Response.StatusCode = statusCode;
+
+        await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken);
+
         return true;
     }
 }

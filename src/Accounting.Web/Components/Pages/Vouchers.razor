@@ -2,6 +2,8 @@
 
 @inject NavigationManager NavManager
 @inject IVoucherService VoucherService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudTable T="VoucherDto"
@@ -16,6 +18,13 @@
         <ToolBarContent>
             <MudText Typo="Typo.h6">اسناد حسابداری</MudText>
             <MudSpacer />
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Class="ms-3"
+                       OnClick="@(() => NavManager.NavigateTo("/vouchers/create"))">
+                سند جدید
+            </MudButton>
+            <MudSpacer />
             <MudTextField T="string" ValueChanged="@(s => OnSearch(s))"
                           Placeholder="جستجو..."
                           Adornment="Adornment.Start"
@@ -24,13 +33,6 @@
                           Class="mt-0"
                           Immediate="true"
                           DebounceInterval="500"></MudTextField>
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Class="ms-3"
-                       OnClick="@(() => NavManager.NavigateTo("/vouchers/create"))">
-                سند جدید
-            </MudButton>
         </ToolBarContent>
 
         <HeaderContent>
@@ -58,7 +60,13 @@
             <MudTd DataLabel="عملیات">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Size="Size.Small"
+                               Color="Color.Info"
                                OnClick="@(() => NavManager.NavigateTo($"/vouchers/edit/{context.Id}"))" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Color="Color.Error"
+                               OnClick="@(() => DeleteVoucher(context.Id, (int)context.VoucherNumber))" />
             </MudTd>
         </RowTemplate>
 
@@ -82,7 +90,6 @@
     private string _searchString = "";
     private bool _loading = true;
 
-    
     private async Task<TableData<VoucherDto>> ServerReload(TableState state, CancellationToken token)
     {
         _loading = true;
@@ -101,11 +108,37 @@
         }
         catch (Exception ex)
         {
+            // 1. Error Snackbar for loading failures
+            Snackbar.Add(ex.Message, Severity.Error);
             return new TableData<VoucherDto>() { TotalItems = 0, Items = new List<VoucherDto>() };
         }
         finally
         {
             _loading = false;
+        }
+    }
+
+    private async Task DeleteVoucher(Guid id, int voucherNumber)
+    {
+        var confirm = await DialogService.ShowMessageBox(
+            "حذف سند",
+            $"آیا از حذف سند شماره {voucherNumber} اطمینان دارید؟",
+            yesText: "بله", cancelText: "خیر");
+
+        if (confirm == true)
+        {
+            try
+            {
+                await VoucherService.DeleteVoucherAsync(id);
+
+                Snackbar.Add("سند با موفقیت حذف شد.", Severity.Success);
+
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
         }
     }
 

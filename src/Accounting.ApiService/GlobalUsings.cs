@@ -7,6 +7,8 @@ global using Accounting.Application.Features.Vouchers.GetVouchers;
 global using Accounting.Application.Features.Vouchers.UpdateVoucher;
 global using Accounting.Domain.Exceptions;
 global using Accounting.Infrastructure;
+global using Accounting.Shared.Models;
+global using Accounting.Shared.Requests;
 global using FluentValidation;
 global using Grpc.Core;
 global using HealthChecks.UI.Client;

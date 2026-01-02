@@ -6,7 +6,7 @@
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudText Typo="Typo.h5" Class="mb-4">ویرایش سند</MudText>
 
-    @if (_voucherUiModel == null)
+    @if (_voucherUiModel is null)
     {
         <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
     }
@@ -21,27 +21,11 @@
 
 @code {
     [Parameter] public Guid Id { get; set; }
-    private VoucherDto _voucherUiModel;
+    private VoucherDto? _voucherUiModel;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate Fetching Data
-        // _voucherUiModel = await VoucherService.GetByIdAsync(Id);
-
-        // Mock Data for Demo
-        await Task.Delay(500);
-        _voucherUiModel = new VoucherDto
-        {
-            Id = Id,
-            VoucherNumber = 101,
-            Date = DateOnly.FromDateTime(DateTime.Now),
-            Description = "بابت اصلاح حساب",
-            Lines = new List<VoucherLineDto>
-            {
-                new VoucherLineDto("101", "صندوق", 1000, 0),
-                new VoucherLineDto("201", "بانک", 0, 1000)
-            }
-        };
+        _voucherUiModel = await VoucherService.GetVoucherByIdAsync(Id);
     }
 
     private async Task HandleUpdate()

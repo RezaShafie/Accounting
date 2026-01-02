@@ -1,57 +1,44 @@
-﻿using Accounting.Shared.Models;
-using Accounting.Shared.Requests;
-using CreateVoucherRequest = Accounting.Shared.Requests.CreateVoucherRequest;
-
-namespace Accounting.ApiService.Endpoints;
+﻿namespace Accounting.ApiService.Endpoints;
 
 public static class VoucherEndpoints
 {
     public static void MapVoucherEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/vouchers")
-                       .WithTags("Vouchers")
-                       .WithOpenApi();
-
+                        .WithTags("Vouchers")
+                        .WithOpenApi();
 
         group.MapPost("/", CreateVoucher)
              .WithName("CreateVoucher")
-             .Produces<Guid>(StatusCodes.Status200OK)
-             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
-
+             .Produces<Result<Guid>>(StatusCodes.Status200OK);
 
         group.MapPut("/{id:guid}", UpdateVoucher)
              .WithName("UpdateVoucher")
-             .Produces(StatusCodes.Status204NoContent)
-             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-             .Produces<ProblemDetails>(StatusCodes.Status404NotFound);
+             .Produces<Result>(StatusCodes.Status200OK);
+        // Note: Unified API usually returns 200 OK with success=true, not 204 No Content
 
         group.MapGet("/", GetVouchers)
              .WithName("GetVouchers")
-             .Produces<PaginatedList<VoucherDto>>(StatusCodes.Status200OK)
-             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+             .Produces<Result<PaginatedList<VoucherDto>>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:guid}", GetVoucherById)
              .WithName("GetVoucherById")
-             .Produces<VoucherDto>(StatusCodes.Status200OK)
-             .Produces(StatusCodes.Status404NotFound);
-
+             .Produces<Result<VoucherDto>>(StatusCodes.Status200OK);
 
         group.MapDelete("/{id:guid}", DeleteVoucher)
              .WithName("DeleteVoucher")
-             .Produces(StatusCodes.Status204NoContent)
-             .Produces(StatusCodes.Status404NotFound);
+             .Produces<Result>(StatusCodes.Status200OK);
     }
-
-
 
     private static async Task<IResult> CreateVoucher(
         [FromBody] CreateVoucherRequest request,
         IMediator mediator)
     {
-        var command = new 
-            CreateVoucherCommand(request.VoucherNumber, request.Description, request.Date, request.Lines);
+        var command = new CreateVoucherCommand(request.VoucherNumber, request.Description, request.Date, request.Lines);
         var id = await mediator.Send(command);
-        return TypedResults.Ok(id);
+
+        // Wrap response in Result
+        return TypedResults.Ok(Result<Guid>.Success(id, "Voucher created successfully."));
     }
 
     private static async Task<IResult> UpdateVoucher(
@@ -59,20 +46,18 @@ public static class VoucherEndpoints
         [FromBody] UpdateVoucherRequest request,
         IMediator mediator)
     {
-        if (id != request.Id) return TypedResults.BadRequest("ID mismatch");
-
-        var command = new 
-            UpdateVoucherCommand(request.Id, request.Description, request.Date, request.Lines);
-
-        try
+        if (id != request.Id)
         {
-            await mediator.Send(command);
-            return TypedResults.NoContent();
+            // Even validation errors should follow the unified structure
+            return TypedResults.Ok(Result.Failure("Voucher ID mismatch in body and URL."));
         }
-        catch (KeyNotFoundException)
-        {
-            return TypedResults.NotFound();
-        }
+
+        var command = new UpdateVoucherCommand(request.Id, request.Description, request.Date, request.Lines);
+
+        await mediator.Send(command);
+
+        // Return 200 OK with Success wrapper
+        return TypedResults.Ok(Result.Success("Voucher updated successfully."));
     }
 
     private static async Task<IResult> GetVouchers(
@@ -80,37 +65,28 @@ public static class VoucherEndpoints
         IMediator mediator)
     {
         var result = await mediator.Send(query);
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(Result<PaginatedList<VoucherDto>>.Success(result));
     }
 
-    private static async Task<Results<Ok<VoucherDto>, NotFound>> GetVoucherById(
+    private static async Task<IResult> GetVoucherById(
         Guid id,
         IMediator mediator)
     {
-        try
-        {
-            var result = await mediator.Send(new GetVoucherByIdQuery(id));
-            return TypedResults.Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return TypedResults.NotFound();
-        }
+        var result = await mediator.Send(new GetVoucherByIdQuery(id));
+
+        // Assuming your Query throws NotFoundException if null, 
+        // global handler catches it. If it returns null, handle it here:
+        if (result is null)
+            throw new KeyNotFoundException($"Voucher with ID {id} not found.");
+
+        return TypedResults.Ok(Result<VoucherDto>.Success(result));
     }
 
     private static async Task<IResult> DeleteVoucher(
         Guid id,
         IMediator mediator)
     {
-        try
-        {
-            // فرض بر اینکه DeleteVoucherCommand ساخته شده است
-            await mediator.Send(new DeleteVoucherCommand(id));
-            return TypedResults.NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return TypedResults.NotFound();
-        }
+        await mediator.Send(new DeleteVoucherCommand(id));
+        return TypedResults.Ok(Result.Success("Voucher deleted successfully."));
     }
 }

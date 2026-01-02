@@ -33,16 +33,12 @@ public class Voucher : AggregateRoot
 
         if (date > DateOnly.FromDateTime(DateTime.Now))
         {
-             throw new DomainException("تاریخ سند نمی‌تواند در آینده باشد.");
+            throw new DomainException("تاریخ سند نمی‌تواند در آینده باشد.");
         }
 
         return new Voucher(voucherNumber, description, date);
     }
 
-    public static Voucher Create(long voucherNumber, string description)
-    {
-        return Create(voucherNumber, description, DateOnly.FromDateTime(DateTime.Now));
-    }
 
     public void Update(string description, DateOnly date)
     {
@@ -66,11 +62,30 @@ public class Voucher : AggregateRoot
         if (IsFinalized)
             throw new DomainException("سند تایید شده قابل ویرایش نیست.");
 
-        // تبدیل String به ValueObject همینجا انجام می‌شود تا اگر نامعتبر بود خطا دهد
         var coding = AccountCoding.Create(accountCodeRaw);
 
         var line = new VoucherLine(Id, coding, debit, credit, description);
         _lines.Add(line);
+    }
+    public void UpdateLine(Guid id, string accountCodeRaw, string description, decimal debit, decimal credit)
+    {
+        if (IsFinalized)
+            throw new DomainException("سند تایید شده قابل ویرایش نیست.");
+
+        var line = _lines.FirstOrDefault(l => l.Id == id);
+
+        line?.Update(AccountCoding.Create(accountCodeRaw)
+            , debit
+            , credit
+            , description);
+    }
+    public void RemoveLine(Guid lineId)
+    {
+        var line = _lines.FirstOrDefault(x => x.Id == lineId);
+        if (line != null)
+        {
+            _lines.Remove(line);
+        }
     }
 
     public bool IsBalanced()

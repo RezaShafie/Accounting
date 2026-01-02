@@ -23,6 +23,7 @@ public class GetVoucherByIdHandler(IAppDbContext context) : IRequestHandler<GetV
             voucher.Description,
             voucher.IsFinalized,
             voucher.Lines.Select(l => new VoucherLineDto(
+                l.Id,
                 l.AccountCoding.Value,
                 l.Description,
                 l.Debit,
