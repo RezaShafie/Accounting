@@ -24,15 +24,14 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("sqldata");
 
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            throw new InvalidOperationException("Connection string 'sqldata' not found.");
         }
 
         services.AddHealthChecks()
-            .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
             .AddDbContextCheck<AppDbContext>(
                 name: "database_ef_core",
                 tags: ["db", "ef"])

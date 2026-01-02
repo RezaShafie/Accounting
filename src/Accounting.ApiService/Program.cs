@@ -11,6 +11,8 @@ builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddWebServices(builder.Configuration);
 
+builder.EnrichInfrastructureDatabase();
+
 builder.Services.AddProblemDetails();
 
 builder.Services.AddOpenApi();
