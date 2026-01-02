@@ -30,7 +30,7 @@ public static class VoucherEndpoints
              .WithName("DeleteVoucher")
              .Produces<Result>(StatusCodes.Status200OK);
 
-        group.MapPost("finalize/{id:guid}", DeleteVoucher)
+        group.MapPost("finalize/{id:guid}", FinalizeVoucher)
              .WithName("FinalizeVoucher")
              .Produces<Result>(StatusCodes.Status200OK);
     }
@@ -79,8 +79,6 @@ public static class VoucherEndpoints
     {
         var result = await mediator.Send(new GetVoucherByIdQuery(id));
 
-        // Assuming your Query throws NotFoundException if null, 
-        // global handler catches it. If it returns null, handle it here:
         if (result is null)
             throw new NotFoundException($"سند با شناسه {id} یافت نشد");
 
