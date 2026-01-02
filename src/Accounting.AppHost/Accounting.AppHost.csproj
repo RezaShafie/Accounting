@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Accounting.ApiService\Accounting.ApiService.csproj" />
     <ProjectReference Include="..\Accounting.Web\Accounting.Web.csproj" />
   </ItemGroup>
