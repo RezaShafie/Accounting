@@ -14,6 +14,7 @@
     {
         <VoucherForm Model="_voucherUiModel"
                      IsEditMode="true"
+                     IsBusy="_isBusy"
                      OnValidSubmit="HandleUpdate"
                      OnCancel="GoBack" />
     }
@@ -22,6 +23,7 @@
 @code {
     [Parameter] public Guid Id { get; set; }
     private VoucherDto? _voucherUiModel;
+    private bool _isBusy;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,6 +41,9 @@
 
     private async Task HandleUpdate()
     {
+        if (_isBusy) return;
+        _isBusy = true;
+
         if (_voucherUiModel is null) return;
 
         try
@@ -60,6 +65,10 @@
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isBusy = false;
         }
     }
 

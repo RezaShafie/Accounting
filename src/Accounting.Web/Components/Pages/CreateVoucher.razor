@@ -8,15 +8,19 @@
 
     <VoucherForm Model="_voucherUiModel"
                  IsEditMode="false"
+                 IsBusy="_isBusy"
                  OnValidSubmit="HandleCreate"
                  OnCancel="GoBack" />
 </MudContainer>
 
 @code {
     private VoucherDto _voucherUiModel = new() { Date = DateOnly.FromDateTime(DateTime.Now) };
+    private bool _isBusy;
 
     private async Task HandleCreate()
     {
+        if (_isBusy) return;
+        _isBusy = true;
         try
         {
             var request = new CreateVoucherRequest
@@ -37,6 +41,10 @@
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isBusy = false;
         }
     }
 

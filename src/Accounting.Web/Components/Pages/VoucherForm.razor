@@ -1,101 +1,117 @@
-﻿@using System.Globalization
-@namespace Accounting.Client.Pages
+﻿@using FluentValidation
+@using Accounting.Web.Validators
+@using Severity = MudBlazor.Severity
 
-<MudPaper Class="pa-4">
-    <MudForm @ref="_form" @bind-IsValid="@_success">
-        <MudGrid>
-            <MudItem xs="12" md="4">
-                <MudNumericField @bind-Value="Model.VoucherNumber"
-                                 Label="شماره سند"
-                                 Variant="Variant.Outlined"
-                                 ReadOnly="IsEditMode"
-                                 Min="1" />
-            </MudItem>
-            <MudItem xs="12" md="4">
-                <MudDatePicker Label="تاریخ سند"
-                               @bind-Date="DateProxy"
-                               Variant="Variant.Outlined"
-                               Culture="@(new CultureInfo("fa-IR"))" />
-            </MudItem>
-            <MudItem xs="12" md="12">
-                <MudTextField @bind-Value="Model.Description"
-                              Label="شرح کلی سند"
-                              Variant="Variant.Outlined"
-                              Lines="2" />
-            </MudItem>
+<MudForm Model="@Model" @ref="_form" Validation="@(ValidateValue)" ValidationDelay="0">
 
-            <MudItem xs="12">
-                <MudTable Items="@Model.Lines" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Dense="true">
-                    <ToolBarContent>
-                        <MudText Typo="Typo.h6">آرتیکل‌های سند</MudText>
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudNumericField @bind-Value="Model.VoucherNumber"
+                             Label="شماره سند"
+                             Variant="Variant.Outlined"
+                             For="@(() => Model.VoucherNumber)" />
+        </MudItem>
 
+        <MudItem xs="12" sm="4">
+            <MudDatePicker Date="@(Model.Date.ToDateTime(TimeOnly.MinValue))"
+                           DateChanged="@(d => Model.Date = DateOnly.FromDateTime(d!.Value))"
+                           Label="تاریخ سند"
+                           Variant="Variant.Outlined"/>
+        </MudItem>
 
-                    </ToolBarContent>
-                    <HeaderContent>
-                        <MudTh>کد حساب</MudTh>
-                        <MudTh>شرح ردیف</MudTh>
-                        <MudTh>بدهکار</MudTh>
-                        <MudTh>بستانکار</MudTh>
-                        <MudTh>عملیات</MudTh>
-                    </HeaderContent>
-                    <RowTemplate Context="line">
-                        <MudTd DataLabel="کد حساب">
-                            <MudTextField @bind-Value="line.AccountCode" Margin="Margin.Dense" />
-                        </MudTd>
-                        <MudTd DataLabel="شرح ردیف">
-                            <MudTextField @bind-Value="line.Description" Margin="Margin.Dense" />
-                        </MudTd>
-                        <MudTd DataLabel="بدهکار">
-                            <MudNumericField @bind-Value="line.Debit" Margin="Margin.Dense" HideSpinButtons="true" Format="N0" />
-                        </MudTd>
-                        <MudTd DataLabel="بستانکار">
-                            <MudNumericField @bind-Value="line.Credit" Margin="Margin.Dense" HideSpinButtons="true" Format="N0" />
-                        </MudTd>
-                        <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => RemoveLine(line))" Size="Size.Small" />
-                        </MudTd>
-                    </RowTemplate>
-                    <FooterContent>
-                        <br/>
-                        <MudButton StartIcon="@Icons.Material.Filled.Add"
-                                   Color="Color.Primary"
-                                   OnClick="AddLine"
-                                   Variant="Variant.Outlined">افزودن ردیف</MudButton>
-                        <MudTd colspan="2"><strong>جمع کل:</strong></MudTd>
-                        <MudTd><strong>@Model.Lines.Sum(x => x.Debit).ToString("N0")</strong></MudTd>
-                        <MudTd><strong>@Model.Lines.Sum(x => x.Credit).ToString("N0")</strong></MudTd>
-                        <MudTd></MudTd>
-                    </FooterContent>
-                </MudTable>
-            </MudItem>
+        <MudItem xs="12" sm="12">
+            <MudTextField @bind-Value="Model.Description"
+                          Label="شرح سند"
+                          Variant="Variant.Outlined"
+                          For="@(() => Model.Description)" />
+        </MudItem>
+    </MudGrid>
 
-            <MudItem xs="12" Class="d-flex justify-end gap-2 mt-4">
-                <MudButton Variant="Variant.Text" OnClick="OnCancel">انصراف</MudButton>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="@(!_success)"
-                           OnClick="Submit">
-                    @(IsEditMode ? "ویرایش سند" : "ثبت سند")
-                </MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudForm>
-</MudPaper>
+    <MudDivider Class="my-4" />
+
+    <MudTable Items="@Model.Lines" Dense="true" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>کد حساب</MudTh>
+            <MudTh>شرح</MudTh>
+            <MudTh>بدهکار</MudTh>
+            <MudTh>بستانکار</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate Context="line">
+            <MudTd>
+                <MudTextField @bind-Value="line.AccountCode" 
+                              For="@(() => line.AccountCode)"
+                              Validation="@((object x, string p) => ValidateLine(line, p))" 
+                              Placeholder="xxxx-xxxx-xxxx" />
+            </MudTd>
+            <MudTd>
+                <MudTextField @bind-Value="line.Description" 
+                              For="@(() => line.Description)" 
+                              Validation="@((object x, string p) => ValidateLine(line, p))" />
+            </MudTd>
+            <MudTd>
+                <MudNumericField @bind-Value="line.Debit" 
+                                 For="@(() => line.Debit)"
+                                 Validation="@((object x, string p) => ValidateLine(line, p))"
+                                 HideSpinButtons="true" />
+            </MudTd>
+            <MudTd>
+                <MudNumericField @bind-Value="line.Credit" 
+                                 For="@(() => line.Credit)"
+                                 Validation="@((object x, string p) => ValidateLine(line, p))"
+                                 HideSpinButtons="true" />
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               OnClick="@(() => RemoveLine(line))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddLine" Class="mt-2">
+        افزودن سطر
+    </MudButton>
+
+    @if (_form.Errors.Any())
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-3">
+            @foreach (var err in _form.Errors)
+            {
+                <MudText>@err</MudText>
+            }
+        </MudAlert>
+    }
+
+    <MudStack Row="true" Class="mt-4 justify-end">
+        <MudButton OnClick="OnCancel" Variant="Variant.Text">انصراف</MudButton>
+        <MudButton Disabled="@IsBusy" OnClick="Submit" Variant="Variant.Filled" Color="Color.Primary">
+            @if (IsBusy)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <text>ثبت سند</text>
+            }
+        </MudButton>
+    </MudStack>
+
+</MudForm>
 
 @code {
     [Parameter] public VoucherDto Model { get; set; } = new();
-    [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
 
     private MudForm _form;
-    private bool _success;
 
-    private DateTime? DateProxy
-    {
-        get => Model.Date.ToDateTime(TimeOnly.MinValue);
-        set => Model.Date = value.HasValue ? DateOnly.FromDateTime(value.Value) : DateOnly.FromDateTime(DateTime.Now);
-    }
+    private VoucherValidator _voucherValidator = new();
+
+    // 2. Validator for the Children (Table Rows)
+    private VoucherLineValidator _lineValidator = new();
 
     private void AddLine()
     {
@@ -110,9 +126,30 @@
     private async Task Submit()
     {
         await _form.Validate();
+
         if (_form.IsValid)
         {
             await OnValidSubmit.InvokeAsync();
         }
+    }
+
+    private async Task<IEnumerable<string>> ValidateValue(object model, string propertyName)
+    {
+        var result = await _voucherValidator.ValidateAsync(
+            ValidationContext<VoucherDto>.CreateWithOptions((VoucherDto)model, x => x.IncludeProperties(propertyName)));
+        
+        if (result.IsValid) return Array.Empty<string>();
+        return result.Errors.Select(e => e.ErrorMessage);
+    }
+
+    private async Task<IEnumerable<string>> ValidateLine(VoucherLineDto lineModel, string propertyName)
+    {
+        var result = await _lineValidator.ValidateAsync(
+            ValidationContext<VoucherLineDto>.CreateWithOptions(lineModel, x => x.IncludeProperties(propertyName)));
+    
+        if (result.IsValid)
+            return Array.Empty<string>();
+        
+        return result.Errors.Select(e => e.ErrorMessage);
     }
 }
