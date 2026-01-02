@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+option csharp_namespace = "Accounting.ApiService.Grpc";
+
+package voucher;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+
+service VoucherService {
+  rpc CreateVoucher (CreateVoucherRequest) returns (CreateVoucherReply);
+  rpc UpdateVoucher (UpdateVoucherRequest) returns (UpdateVoucherReply);
+  rpc DeleteVoucher (DeleteVoucherRequest) returns (google.protobuf.Empty);
+  rpc GetVoucherById (GetVoucherByIdRequest) returns (VoucherReply);
+  rpc ListVouchers (ListVouchersRequest) returns (ListVouchersReply);
+}
+
+/// Request to create a voucher.
+message CreateVoucherRequest {
+  int64 voucher_number = 1;
+  string description = 2;
+
+  // Use a timestamp to carry the voucher date (proto has no DateOnly).
+  google.protobuf.Timestamp voucher_date = 4;
+
+  repeated VoucherLineDtoGrpc lines = 3;
+}
+
+/// A single voucher line. Monetary values are sent as integer minor-units (cents)
+/// to avoid floating point precision issues.
+message VoucherLineDtoGrpc {
+  string account_code_raw = 1;
+  string description = 2;
+  int64 debit = 3;
+  int64 credit = 4;
+}
+
+/// Reply containing the created voucher identifier.
+message CreateVoucherReply {
+  string voucher_id = 1;
+}
+
+// UPDATE
+message UpdateVoucherRequest {
+  string voucher_id = 1;
+  int64 voucher_number = 2;
+  string description = 3;
+  google.protobuf.Timestamp voucher_date = 4;
+  repeated VoucherLineDtoGrpc lines = 5;
+}
+
+message UpdateVoucherReply {
+  bool success = 1;
+}
+
+// DELETE
+message DeleteVoucherRequest {
+  string voucher_id = 1;
+}
+
+// GET BY ID
+message GetVoucherByIdRequest {
+  string voucher_id = 1;
+}
+
+// GET ALL (LIST)
+message ListVouchersRequest {
+  int32 page_number = 1; 
+  int32 page_size = 2;
+}
+
+message ListVouchersReply {
+  repeated VoucherReply vouchers = 1;
+}
+
+// SHARED REPLY OBJECT
+message VoucherReply {
+  string voucher_id = 1;
+  int64 voucher_number = 2;
+  string description = 3;
+  google.protobuf.Timestamp voucher_date = 4;
+  repeated VoucherLineDtoGrpc lines = 5;
+}
