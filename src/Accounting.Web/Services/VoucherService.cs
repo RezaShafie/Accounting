@@ -1,6 +1,7 @@
 ﻿using Accounting.Application.Features.Vouchers;
 using Accounting.Shared.Models;
 using Accounting.Shared.Requests;
+using MediatR;
 
 namespace Accounting.Web.Services;
 
@@ -85,6 +86,19 @@ public class VoucherService(HttpClient httpClient, ILogger<VoucherService> logge
         }
     }
 
+    public async Task FinalizeVoucherAsync(Guid id)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"api/vouchers/finalize",id);
+            await HandleResponseAsync(response);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "خطا در حذف سند {Id}", id);
+            throw;
+        }
+    }
 
 
     /// <summary>

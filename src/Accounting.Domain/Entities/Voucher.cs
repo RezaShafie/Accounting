@@ -95,7 +95,7 @@ public class Voucher : AggregateRoot
         return totalDebit == totalCredit && _lines.Any();
     }
 
-    public void Finalize()
+    public void FinalizeVoucher()
     {
         if (!IsBalanced())
             throw new DomainException("سند تراز نیست و نمی‌تواند ثبت نهایی شود.");

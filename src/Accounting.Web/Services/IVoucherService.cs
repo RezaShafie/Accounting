@@ -11,4 +11,5 @@ public interface IVoucherService
     Task CreateVoucherAsync(CreateVoucherRequest request);
     Task UpdateVoucherAsync(Guid id, UpdateVoucherRequest request);
     Task DeleteVoucherAsync(Guid id);
+    Task FinalizeVoucherAsync(Guid id);
 }
