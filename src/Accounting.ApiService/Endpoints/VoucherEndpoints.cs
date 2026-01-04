@@ -42,7 +42,6 @@ public static class VoucherEndpoints
         var command = new CreateVoucherCommand(request.Description, request.Date, request.Lines);
         var id = await mediator.Send(command);
 
-        // Wrap response in Result
         return TypedResults.Ok(Result<Guid>.Success(id, "سند با موفقیت ساخته شد"));
     }
 
@@ -53,15 +52,13 @@ public static class VoucherEndpoints
     {
         if (id != request.Id)
         {
-            // Even validation errors should follow the unified structure
-            return TypedResults.Ok(Result.Failure("شناسه همخوانی ندارد"));
+            return TypedResults.Conflict(Result.Failure("شناسه همخوانی ندارد"));
         }
 
         var command = new UpdateVoucherCommand(request.Id, request.Description, request.Date, request.Lines);
 
         await mediator.Send(command);
 
-        // Return 200 OK with Success wrapper
         return TypedResults.Ok(Result.Success("سند با موفقیت بروز شد."));
     }
 

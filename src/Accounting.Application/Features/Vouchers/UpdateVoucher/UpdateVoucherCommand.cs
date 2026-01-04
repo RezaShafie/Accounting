@@ -2,7 +2,7 @@
 
 public record UpdateVoucherCommand(
     Guid Id,
-    string Description,
+    string? Description,
     DateOnly Date,
     List<VoucherLineDto> Lines 
 ) : IRequest;

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Accounting.Tests;
 
-public class WebTests
+public class SampleTests
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
