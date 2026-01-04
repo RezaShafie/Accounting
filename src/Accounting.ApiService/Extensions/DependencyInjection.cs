@@ -24,11 +24,11 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("sqldata");
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new InvalidOperationException("Connection string 'sqldata' not found.");
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         }
 
         services.AddHealthChecks()

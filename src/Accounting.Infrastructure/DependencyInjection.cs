@@ -23,7 +23,7 @@ public static class DependencyInjection
 
     public static void EnrichInfrastructureDatabase(this IHostApplicationBuilder builder)
     {
-        builder.AddSqlServerDbContext<AppDbContext>("sqldata", configureDbContextOptions: options =>
+        builder.AddSqlServerDbContext<AppDbContext>("DefaultConnection", configureDbContextOptions: options =>
         {
             var serviceProvider = builder.Services.BuildServiceProvider();
             var auditableInterceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();

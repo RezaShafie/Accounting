@@ -1,0 +1,60 @@
+﻿version: '3.8'
+
+services:
+  # 🌐 Frontend (Blazor Server)
+  accounting.web:
+    image: ${DOCKER_REGISTRY-}accountingweb
+    container_name: accounting_web
+    build:
+      context: .
+      dockerfile: src/Accounting.Web/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ApiSettings__BaseUrl=http://accounting.api:8080
+    ports:
+      - "5100:8080"
+    depends_on:
+      - accounting.api
+    networks:
+      - accounting-net
+
+  # ⚙️ Backend (API)
+  accounting.api:
+    image: ${DOCKER_REGISTRY-}accountingapi
+    container_name: accounting_api
+    build:
+      context: .
+      dockerfile: src/Accounting.ApiService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AccountingDb;User Id=sa;Password=Paswword123!;TrustServerCertificate=True;
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - accounting-net
+
+  # 🗄️ Database (SQL Server)
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: accounting_sql
+    user: root
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Paswword123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql/data
+    networks:
+      - accounting-net
+
+networks:
+  accounting-net:
+    driver: bridge
+
+volumes:
+  sqldata:

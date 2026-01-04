@@ -1,15 +1,16 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Accounting.ApiService/Accounting.ApiService.csproj" />
-    <Project Path="src/Accounting.AppHost/Accounting.AppHost.csproj" />
     <Project Path="src/Accounting.Application/Accounting.Application.csproj" Id="5d810282-dccf-4266-9d2c-d96ce7100a10" />
     <Project Path="src/Accounting.Domain/Accounting.Domain.csproj" Id="378827a5-f7b5-4589-a8c6-93efa04c1b48" />
     <Project Path="src/Accounting.Infrastructure/Accounting.Infrastructure.csproj" Id="59bcd3df-f2f2-4ab8-aa54-60c47752eed9" />
-    <Project Path="src/Accounting.ServiceDefaults/Accounting.ServiceDefaults.csproj" />
     <Project Path="src/Accounting.Shared/Accounting.Shared.csproj" Id="325aa2d2-cbe9-4aa2-a880-b0d3bf393f9d" />
     <Project Path="src/Accounting.Web/Accounting.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Accounting.Tests/Accounting.Tests.csproj" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>

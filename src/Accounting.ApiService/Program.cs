@@ -4,7 +4,6 @@ using Accounting.ApiService.GrpcServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
 
 builder.Services
     .AddApplication()
@@ -28,7 +27,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapDefaultEndpoints();
+
 app.MapVoucherEndpoints();
 app.MapGrpcService<VoucherGrpcService>();
 

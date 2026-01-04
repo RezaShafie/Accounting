@@ -4,8 +4,6 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -18,8 +16,8 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddHttpClient<IVoucherService, VoucherService>(client =>
 {
-    client.BaseAddress = new Uri("http://apiservice");
-    client.Timeout = TimeSpan.FromSeconds(9999);
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 var app = builder.Build();
@@ -41,7 +39,6 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapDefaultEndpoints();
 
 
 app.Run();

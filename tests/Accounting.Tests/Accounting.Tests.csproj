@@ -28,7 +28,6 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Accounting.AppHost\Accounting.AppHost.csproj" />
     <ProjectReference Include="..\..\src\Accounting.Infrastructure\Accounting.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Accounting.Shared\Accounting.Shared.csproj" />
   </ItemGroup>
